@@ -13,16 +13,20 @@ from time import time
 import queue
 
 
+
 def graphInfo(G):
     
     """ Gives all the requested infos about our graph
+    
     Args:
         G : the initial graph we have built
+        
     Returns:
-        The number of articles V
-        The number of hyperlinks E
-        The average number of links per page
-        The graph density
+        The function prints:
+            -The number of articles V
+            -The number of hyperlinks E
+            -The average number of links per page
+            -The graph density
     """
     
     V = G.number_of_nodes()
@@ -30,9 +34,23 @@ def graphInfo(G):
     print('We have a graph containing',V,'articles and',E,'hyperlinks.')
     print('The average number of links per page is:', round(E/V,4))
     print('The graph density is',E/(V*(V-1)))
+    return
+    
     
     
 def RQ2(page, nr_clicks, df_links):
+    
+    """ Returns the result required by RQ2
+    
+    Args:
+        page: the starting page of the user
+        nr_clicks: the maximum number of clicks a user can do
+        df_links: the dataframe that contains all the edges in the graph
+        
+    Returns:
+        the set of all pages that a user can reach within d clicks
+    """
+    
     reachable = []
     new_nodes = [page] # Starting page
     for i in range(nr_clicks):
@@ -47,9 +65,22 @@ def RQ2(page, nr_clicks, df_links):
         
     return pd.DataFrame(list(set(reachable)))
 
-# The BFS algorithm returns the shortest path in undirected graphs with all links weight equal to 1
+
 
 def BFS(G,v):
+    
+    """ Implements the BFS algorithm
+    
+    Args:
+        G: the graph on which the BFS is implemented
+        v: the starting node for the BFS
+        
+    Returns:
+        dist: a dictionary that associates to each reached node the number of edges necessary to reach that node from v. 
+        paths: a dictionary that associates to each node the path (represented as a list of nodes) to reach it from v.
+            This corresponds to the shortest path in undirected graphs with all links weight equal to 1.
+    """
+    
     q = deque()
     dist = dict()
     paths = defaultdict(list)
@@ -70,9 +101,20 @@ def BFS(G,v):
                 
     return dist, paths
 
-# for the given category C we create the subgraph of C for all the given nodes and edges that belong to C
+
 
 def categoryGraph(G,C,nodes):
+    
+    """ 
+    Args:
+        G: the total graph
+        C: the category for which we want to return the subgraph
+        nodes: a dictionary where each node is a key and its value is in turn a dictionary containing the attributes "category"
+            and "name" for that node
+        
+    Returns:
+        out: the subgraph of all the nodes in C
+    """
     
     out = nx.MultiDiGraph()
     
@@ -89,13 +131,26 @@ def categoryGraph(G,C,nodes):
     
     return out
 
+
+
 # Dummy function to initialize default dict with zeros
 def zero():
     return 0
 
-# find the most central article which is the one with the highest indegree
+
 
 def most_central_article(subset, df_links):
+    
+    """ The function finds the most central article which is the one with the highest indegree
+    
+    Args:
+        subset: the subset of nodes we are considering
+        df_links: the dataframe that contains all the edges in the graph
+        
+    Returns:
+        out: the most central article according to the indegree centrality
+    """
+    
     d = defaultdict(zero)
     n_nodes = len(df_links)
     for edge in subset.edges():
@@ -103,7 +158,23 @@ def most_central_article(subset, df_links):
     out = max(d, key=d.get)
     return out
 
+
+
 def RQ3(G,C,df_links,nodes, S=None):
+    
+    """ The function prints the answer for RQ3
+    
+    Args:
+        G: the total graph
+        C: the category we are considering
+        df_links: the dataframe that contains all the edges in the graph
+        nodes: a dictionary where each node is a key and its value is in turn a dictionary containing the attributes "category"
+            and "name" for that node
+        S (optional): the subset of nodes inside C that we are considering.
+        
+    Returns:
+        The function prints the approximate number of clicks to reach all nodes in S
+    """
     
     # nG is the graph with all the nodes belonging to one category
     nG = categoryGraph(G,C,nodes)
@@ -112,7 +183,7 @@ def RQ3(G,C,df_links,nodes, S=None):
     # All shortest paths from v computed through BFS
     _, paths = BFS(nG,v)
     
-    # If the set of pages is not given in input, we sample for the nodes that we can reach
+    # If the set of pages is not given in input, we sample from the nodes that we can reach
     if S == None:
         S = set(random.sample(paths.keys(), 100))
         S.add(v)
@@ -157,9 +228,22 @@ def RQ3(G,C,df_links,nodes, S=None):
     print('The approximated number of clicks is', pathGraph.number_of_edges())
     return
     
-# Creates subgraph induced by two selected categories C1 and C2
+    
 
 def subGraph(G,C1,C2,nodes):
+    
+    """ The function creates the subgraph induced by two selected categories C1 and C2
+    Args:
+        G: the total graph
+        C1: the first category we are considering
+        C2: the second category we are considering
+        nodes: a dictionary where each node is a key and its value is in turn a dictionary containing the attributes "category"
+            and "name" for that node
+        
+    Returns:
+        out: the subgraph of all the nodes in C1 and C2
+    """
+    
     out = nx.MultiDiGraph()
 
     for node in G.nodes():
@@ -176,9 +260,20 @@ def subGraph(G,C1,C2,nodes):
             
     return out
 
-# Performs contraction of an edge.
+
 
 def contract(G, del_edge):
+    
+    """ The function performs the contraction of a given edge
+    
+    Args:
+        G: the graph we are considering
+        del_edge: the edge that will be deleted in the contraction procedure
+        
+    Returns:
+        The function doesn't return anything but has a side effect on input graph G
+    """
+    
     to_keep = del_edge[1]
     to_delete =  del_edge[0]
     
@@ -192,9 +287,19 @@ def contract(G, del_edge):
     G.add_edges_from(to_add)
     return
 
-# Karger algorithm estimates the minimum cut of a connected graph
+
 
 def Karger(G, N = None):
+    
+    """ The function uses Karger algorithm to estimats the minimum cut of a connected graph
+    
+    Args:
+        G: the graph we are considering
+        N(optional): the number of times the function will run Karger algorithm
+        
+    Returns:
+        The function returns the minimum value found among all the simulations of the Karger algorithm
+    """
     
     # number of simulations N, if not given in input uses the optimal number
     if N == None:
@@ -216,14 +321,32 @@ def Karger(G, N = None):
         
     return min(results)
 
-def RQ4(G,C1,C2,u,v,N,categories_list,nodes):
+
+
+def RQ4(G,C1,C2,u,v,N,nodes):
+    
+    """ The function returns the result requested by RQ4
+    
+    Args:
+        G: the total graph
+        C1: the first category we are considering
+        C2: the second category we are considering
+        u: the first node we are considering
+        v: the second node we are considering
+        N: the number of times the Karger algorithm will run
+        nodes: a dictionary where each node is a key and its value is in turn a dictionary containing the attributes "category"
+            and "name" for that node
+        
+    Returns:
+        The function returns the minimum value found among all the simulations of the Karger algorithm
+    """
     
     # checking if the given nodes are in the choosen categories
-    if not (u in categories_list[C1] or u in categories_list[C2]):
+    if not (nodes[u]['category'] == C1 or nodes[u]['category'] == C2):
         print("ERROR: the node ", u ,"is not in either of the two categories")
         return
     
-    if not (v in categories_list[C1] or v in categories_list[C2]):
+    if not (nodes[v]['category'] == C1 or nodes[v]['category'] == C2):
         print("ERROR: the node ", v ,"is not in either of the two categories")
         return
     
@@ -251,7 +374,24 @@ def RQ4(G,C1,C2,u,v,N,categories_list,nodes):
     out = 'The minimum number of hyperlinks to remove in order to disconnect node u and node v is ' + str(Karger(pathGraph,N))
     return out
 
+
+
 def RQ5(G,C,nodes,remaining):
+    
+    """ The function returns the result requested by RQ5
+    
+    Args:
+        G: the total graph
+        C: the category we are considering
+        nodes: a dictionary where each node is a key and its value is in turn a dictionary containing the attributes "category"
+            and "name" for that node
+        remaining: the list of all the categories in the total graph
+        
+    Returns:
+        The function returns, for each category in 'remaining', the distance between this category and 'C', with the distance
+            between two categories defined as the median of the shortest paths from each pair of nodes in the two categories
+    """
+    
     t1 = time()
     
     dist = dict()
@@ -292,10 +432,22 @@ def RQ5(G,C,nodes,remaining):
     print('Reached solution in %f seconds' %(t2-t1))
     return medians
 
-def RQ6(catG,G, alpha=0.15):
+
+
+def RQ6(catG, alpha=0.15):
+    
+    """ The function returns the result requested by RQ6
+    
+    Args:
+        catG: a graph in which each node represents a category
+        alpha: the probability of going to a random node of the graph in the PageRank algorithm
+        
+    Returns:
+        The function prints the PageRank score (multiplied by 100 to make it more readable) for each category/node in 'catG'
+    """
     
     # Creating transition matrix from adjacecy matrix
-    A = nx.adjacency_matrix(G).toarray()
+    A = nx.adjacency_matrix(catG).toarray()
     sum_of_rows = A.sum(axis=1)
     A_norm = A / sum_of_rows[:, np.newaxis]  
     P = alpha * np.ones((len(A),len(A)))/len(A) + (1-alpha)*A_norm
