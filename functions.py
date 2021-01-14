@@ -481,4 +481,35 @@ def RQ6(catG, alpha=0.15):
         
     return results
 
+def plotPR(catG, results):
+    plt.figure(figsize=(20,10))
+    pos = nx.spring_layout(catG, seed=42)
+    d = dict(catG.degree)
 
+    node_sizes = [v * 400 for v in results.values()]
+    cmap = plt.cm.plasma
+
+    nodes = nx.draw_networkx_nodes(catG, 
+                                   pos, 
+                                   node_size=node_sizes, 
+                                   node_color="orange",
+                                   alpha=0.85)
+
+    edges = nx.draw_networkx_edges(catG,
+                                   pos,
+                                   node_size=node_sizes,
+                                   arrowstyle= "->",
+                                   arrowsize= 7,
+                                   width= 1,
+                                   alpha =0.5)
+
+    labels = nx.draw_networkx_labels(catG, 
+                                     pos, 
+                                     font_family='DIN Alternate',
+                                     labels = results,
+                                     font_size=14)
+
+
+    ax = plt.gca()
+    ax.set_axis_off()
+    plt.show()
