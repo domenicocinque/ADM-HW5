@@ -78,7 +78,7 @@ def BFS(G,v):
     Returns:
         dist: a dictionary that associates to each reached node the number of edges necessary to reach that node from v. 
         paths: a dictionary that associates to each node the path (represented as a list of nodes) to reach it from v.
-            This corresponds to the shortest path in undirected graphs with all links weight equal to 1.
+            This corresponds to the shortest path in graphs with all edge weights equal to 1.
     """
     
     q = deque()
