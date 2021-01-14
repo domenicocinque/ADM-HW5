@@ -482,6 +482,17 @@ def RQ6(catG, alpha=0.15):
     return results
 
 def plotPR(catG, results):
+    
+    """ Plots the results of the PageRank algorithm
+    
+    Args:
+        catG: the reduced graph
+        results: the output of the PageRank algorithm 
+        
+    Returns:
+        The plot of the graph with the relative score label on each node
+    """
+    
     plt.figure(figsize=(20,10))
     pos = nx.spring_layout(catG, seed=42)
     d = dict(catG.degree)
